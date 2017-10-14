@@ -7,7 +7,26 @@ module.exports.getAll = function(req, res) {
     res.send(result.rows);
   }).catch((err) => {
     res.status(400).send('Failed to get orders');
-  })
+  });
+}
+
+// TODO: Also verify this
+module.exports.getPage = function(req, res) {
+  db.query('SELECT * FROM orders').then((result) => {
+    var pageLen = req.params.pageLen;
+    var pageNum = req.params.pageNum;
+    var page = [];
+    for (var i = pageLen*pageNum ; i < pageLen*(pageNum+1); i++) {
+      try {
+        page.push(result.rows[i]);
+      } catch (err) {
+        break;
+      }
+    }
+    res.send(page);
+  }).catch((err) => {
+    res.status(400).send('Failed to get orders');
+  });
 }
 
 module.exports.new = function(req, res) {
