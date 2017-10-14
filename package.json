@@ -1,0 +1,20 @@
+{
+  "name": "0xchange-server",
+  "version": "1.0.0",
+  "description": "ETHWaterloo",
+  "scripts": {
+    "serve": "node server/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GFJHogue/0xchange-server.git"
+  },
+  "author": "Billy Rennekamp, Gregory Hogue, Kevin Ho, Alez Zhao",
+  "bugs": {
+    "url": "https://github.com/GFJHogue/0xchange-server/issues"
+  },
+  "homepage": "https://github.com/GFJHogue/0xchange-server#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
