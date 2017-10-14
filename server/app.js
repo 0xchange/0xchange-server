@@ -1,16 +1,14 @@
+var bodyParser = require('body-parser');
 var express = require('express');
 
 var app = express();
 
 
+app.use(bodyParser.json()); // for parsing application/json
+
+
 // API Router
-app.get('/', require('./router.js'));
-
-
-// Send index.html when users load website.
-app.get('*', function(req, res) {
-  res.sendFile(path.join(DIST_DIR, 'index.html'));
-});
+app.use('/', require('./router.js'));
 
 
 // Configure server and start listening.

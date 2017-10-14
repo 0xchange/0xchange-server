@@ -4,5 +4,6 @@ CREATE DATABASE zeroexchange;
 
 CREATE TABLE orders(
   orderObj jsonb NOT NULL,
-  tokenAddress char(42) NOT NULL
+  makerToken char(42) NOT NULL,
+  takerToken char(42) NOT NULL
 );
