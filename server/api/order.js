@@ -10,27 +10,19 @@ module.exports.getAll = function(req, res) {
 }
 
 module.exports.getPage = function(req, res) {
-  db.query('SELECT * FROM orders').then((result) => {
-    var sortBy = req.params.sortBy;
-    var reverse = req.params.reverse;
-    if (sortBy) result.rows.sort((a, b) => {
-      if (a[sortBy] < b[sortBy]) {
-        return -1;
-      } else if (a[sortBy] > b[sortBy]) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-    if (reverse == 'true') result.rows.reverse();
-    var pageLen = parseInt(req.params.pageLen);
-    var pageNum = parseInt(req.params.pageNum);
-    var page = [];
-    for (var i = pageLen*pageNum ; i < pageLen*(pageNum+1); i++) {
-      if (result.rows[i]) page.push(result.rows[i]);
-    }
-    res.send(page);
+  var opts = req.body.opts;
+  var asc = opts.asc ? 'ASC' : 'DESC';
+  db.query(
+    'SELECT orderObj FROM orders ORDER BY $1 '+asc+' LIMIT $2 OFFSET $3;',
+    [
+      opts.sortBy,
+      opts.limit,
+      parseInt(opts.page)*parseInt(opts.limit)
+    ]
+  ).then((result) => {
+    res.send(result.rows);
   }).catch((err) => {
+    console.error(err);
     res.status(400).send('Failed to get orders');
   });
 }

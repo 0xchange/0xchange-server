@@ -7,7 +7,7 @@ var api = require('./api');
 var router = express.Router();
 
 router.get('/get', api.order.getAll);
-router.get('/get/:pageLen/:pageNum/:sortBy/:reverse', api.order.getPage);
+router.post('/get', api.order.getPage);
 
 //router.get('/get/:token', _);
 
