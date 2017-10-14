@@ -1,5 +1,10 @@
 var express = require('express');
 
+
+// Get API implementation.
+var api = require('./api');
+
+// Set up router.
 var router = express.Router();
 
 /*
