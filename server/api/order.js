@@ -44,12 +44,12 @@ module.exports.new = function(req, res) {
       ) VALUES($1, $2, $3, $4, $5, $6, $7)`,
       [
         order,
-        order.makerFee,
+        order.makerFee.toString(16),
         order.makerTokenAddress,
-        order.makerTokenAmount,
-        order.takerFee,
+        order.makerTokenAmount.toString(16),
+        order.takerFee.toString(16),
         order.takerTokenAddress,
-        order.takerTokenAmount
+        order.takerTokenAmount.toString(16)
       ]
     );
   }).then((result) => {
