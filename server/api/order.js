@@ -1,7 +1,6 @@
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
 
-// TODO: Verify this
 module.exports.getAll = function(req, res) {
   db.query('SELECT * FROM orders').then((result) => {
     res.send(result.rows);
@@ -10,18 +9,13 @@ module.exports.getAll = function(req, res) {
   });
 }
 
-// TODO: Also verify this
 module.exports.getPage = function(req, res) {
   db.query('SELECT * FROM orders').then((result) => {
-    var pageLen = req.params.pageLen;
-    var pageNum = req.params.pageNum;
+    var pageLen = parseInt(req.params.pageLen);
+    var pageNum = parseInt(req.params.pageNum);
     var page = [];
     for (var i = pageLen*pageNum ; i < pageLen*(pageNum+1); i++) {
-      try {
-        page.push(result.rows[i]);
-      } catch (err) {
-        break;
-      }
+      if (result.rows[i]) page.push(result.rows[i]);
     }
     res.send(page);
   }).catch((err) => {
