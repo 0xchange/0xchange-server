@@ -5,7 +5,7 @@ try {
   `
   module.exports = {
     infuraURL: 'https://mainnet.infura.io/TOKEN',
-    pg: {
+    pg: {  // node-postgres config
       host: '',
       user: '',
       password: '',
