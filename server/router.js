@@ -6,7 +6,7 @@ var api = require('./api');
 // Set up router.
 var router = express.Router();
 
-//router.get('/get', _);
+router.get('/get', api.order.getAll);
 
 //router.get('/get/:token', _);
 

@@ -1,6 +1,15 @@
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
 
+// TODO: Verify this
+module.exports.getAll = function(req, res) {
+  db.query('SELECT * FROM orders').then((result) => {
+    res.send(result.rows);
+  }).catch((err) => {
+    res.status(400).send('Failed to get orders');
+  })
+}
+
 module.exports.new = function(req, res) {
   var order = req.body;
   zeroEx.exchange.validateOrderFillableOrThrowAsync(order).then(() => {
