@@ -13,9 +13,8 @@ module.exports.getPage = function(req, res) {
   var opts = req.body.opts;
   var asc = opts.asc ? 'ASC' : 'DESC';
   db.query(
-    'SELECT orderObj FROM orders ORDER BY $1 '+asc+' LIMIT $2 OFFSET $3;',
+    'SELECT orderObj FROM orders ORDER BY '+opts.sortBy+' '+asc+' LIMIT $1 OFFSET $2;',
     [
-      opts.sortBy,
       opts.limit,
       parseInt(opts.page)*parseInt(opts.limit)
     ]
