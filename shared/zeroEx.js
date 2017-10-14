@@ -1,6 +1,6 @@
 // Get a ZeroEx object
 
-var config = require('../../shared/config.js');
+var config = require('./config.js');
 var ProviderEngine = require('web3-provider-engine');
 var FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 var RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
