@@ -11,6 +11,18 @@ module.exports.getAll = function(req, res) {
 
 module.exports.getPage = function(req, res) {
   db.query('SELECT * FROM orders').then((result) => {
+    var sortBy = req.params.sortBy;
+    var reverse = req.params.reverse;
+    if (sortBy) result.rows.sort((a, b) => {
+      if (a[sortBy] < b[sortBy]) {
+        return -1;
+      } else if (a[sortBy] > b[sortBy]) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    if (reverse == 'true') result.rows.reverse();
     var pageLen = parseInt(req.params.pageLen);
     var pageNum = parseInt(req.params.pageNum);
     var page = [];
