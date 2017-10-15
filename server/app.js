@@ -2,6 +2,7 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var CronJob = require('cron').CronJob;
 var express = require('express');
+var fs = require('fs');
 var https = require('https');
 
 var app = express();
