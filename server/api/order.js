@@ -8,7 +8,7 @@ module.exports.getAll = function(req, res) {
     var ret = [];
     result.rows.forEach((element) => {
       ret.push(element.orderobj);
-    })
+    });
     res.send(ret);
   }).catch((err) => {
     res.status(400).send('Failed to get orders');

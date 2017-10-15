@@ -6,13 +6,11 @@ var api = require('./api');
 // Set up router.
 var router = express.Router();
 
-router.get('/get', api.order.getAll);
-router.post('/get', api.order.getPage);
+router.get('/order', api.order.getAll);
+router.post('/order', api.order.getPage);
+router.post('/order/new/', api.order.new);
 
-//router.get('/get/:token', _);
-
-router.post('/post/order/', api.order.new);
-
-//router.post('/post/token/:token', _);
+router.get('/token', api.token.getAll);
+router.post('/token', api.token.new);
 
 module.exports = router;

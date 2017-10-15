@@ -11,3 +11,10 @@ CREATE TABLE orders(
   takerTokenAddress char(42) NOT NULL,
   takerTokenAmount varchar(64)
 );
+
+CREATE TABLE tokens(
+  address char(42) NOT NULL,
+  symbol varchar(45),
+  token_name varchar(45),
+  decimals bigint
+);
