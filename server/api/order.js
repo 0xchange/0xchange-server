@@ -1,3 +1,4 @@
+var BigNumber = require('bignumber.js');
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
 
@@ -28,6 +29,12 @@ module.exports.getPage = function(req, res) {
 
 module.exports.new = function(req, res) {
   var order = req.body;
+  order.expirationUnixTimestampSec = new BigNumber(order.expirationUnixTimestampSec);
+  order.makerFee = new BigNumber(order.makerFee);
+  order.makerTokenAmount = new BigNumber(order.makerTokenAmount);
+  order.salt = new BigNumber(order.salt);
+  order.takerFee = new BigNumber(order.takerFee);
+  order.takerTokenAmount = new BigNumber(order.takerTokenAmount);
   zeroEx.exchange.validateOrderFillableOrThrowAsync(order).then(() => {
     return db.query(
       `INSERT INTO orders(
