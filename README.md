@@ -25,9 +25,9 @@ This is the server component of the 0xchange project for ETHWaterloo 2017!
   - body: `ZeroEx.SignedOrder`
 
 
-`GET: /token` - gets all orders in the DB
+`GET: /token` - gets all tokens in the DB
 
-`POST: /token/new` - adds new order to DB if valid
+`POST: /token/new` - adds new token to DB
   - body: `address`, `symbol`, `name`, & `decimals`
 
 
