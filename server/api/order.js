@@ -16,7 +16,7 @@ module.exports.getAll = function(req, res) {
 }
 
 module.exports.getPage = function(req, res) {
-  var opts = req.body.opts;
+  var opts = req.body;
   var asc = opts.asc ? 'ASC' : 'DESC';
   db.query(
     'SELECT orderObj FROM orders ORDER BY '+opts.sortBy+' '+asc+' LIMIT $1 OFFSET $2;',
