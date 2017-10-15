@@ -5,7 +5,11 @@ var zeroEx = require('../../shared/zeroEx.js');
 
 module.exports.getAll = function(req, res) {
   db.query('SELECT orderObj FROM orders').then((result) => {
-    res.send(result.rows);
+    var ret = [];
+    result.rows.forEach((element) => {
+      ret.push(element.orderobj);
+    })
+    res.send(ret);
   }).catch((err) => {
     res.status(400).send('Failed to get orders');
   });
@@ -21,7 +25,11 @@ module.exports.getPage = function(req, res) {
       parseInt(opts.page)*parseInt(opts.limit)
     ]
   ).then((result) => {
-    res.send(result.rows);
+    var ret = [];
+    result.rows.forEach((element) => {
+      ret.push(element.orderobj);
+    })
+    res.send(ret);
   }).catch((err) => {
     console.error(err);
     res.status(400).send('Failed to get orders');
