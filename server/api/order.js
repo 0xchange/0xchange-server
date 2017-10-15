@@ -4,7 +4,7 @@ var pad = require('pad');
 var zeroEx = require('../../shared/zeroEx.js');
 
 module.exports.getAll = function(req, res) {
-  db.query('SELECT * FROM orders').then((result) => {
+  db.query('SELECT orderObj FROM orders').then((result) => {
     res.send(result.rows);
   }).catch((err) => {
     res.status(400).send('Failed to get orders');
