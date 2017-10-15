@@ -1,5 +1,9 @@
 # 0xchange-server
-ETHWaterloo
+This is the server component of the 0xchange project for ETHWaterloo 2017!
+- See the live site at https://0xchange.me/
+- by Billy Rennekamp, Gregory Hogue, Kevin Ho, & Alez Zhao
+
+
 
 ## API reference:
 
