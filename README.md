@@ -9,12 +9,13 @@ ETHWaterloo
   - body:
   ```
   {
-    sortBy: DB column string
+    sortBy: DBColumnID
     asc: acending? true/false
     limit: numberPerPage
     page: pageNumber
   }
   ```
+  - Possible sortBy columns: `makerfee`, `makertokenaddress`, `makertokenamount`, `takerfee`, `takertokenaddress`, or `takertokenamount`
 
 `POST: /post/order` - adds new order to DB if valid
   - body: `ZeroEx.SignedOrder`
