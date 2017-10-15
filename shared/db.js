@@ -5,8 +5,8 @@ var pg = require('pg');
 var pool;
 
 try {
-  pool = new pg.Pool(require('../pg.config.js'));
-  console.log('Using pg.config.js');
+  pool = new pg.Pool(require('../config.js').pg);
+  console.log('Using config.js');
 } catch (err) {
   pool = new pg.Pool({
     database: 'zeroexchange'
