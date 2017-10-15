@@ -7,9 +7,9 @@ This is the server component of the 0xchange project for ETHWaterloo 2017!
 
 ## API reference:
 
-`GET: /get` - gets all orders in the DB
+`GET: /order` - gets all orders in the DB
 
-`POST: /get` - gets some orders in the DB
+`POST: /order` - gets some orders in the DB
   - body:
   ```
   {
@@ -21,8 +21,14 @@ This is the server component of the 0xchange project for ETHWaterloo 2017!
   ```
   - Possible sortBy columns: `makerfee`, `makertokenaddress`, `makertokenamount`, `takerfee`, `takertokenaddress`, or `takertokenamount`
 
-`POST: /post/order` - adds new order to DB if valid
+`POST: /order/new` - adds new order to DB if valid
   - body: `ZeroEx.SignedOrder`
+
+
+`GET: /token` - gets all orders in the DB
+
+`POST: /token/new` - adds new order to DB if valid
+  - body: `address`, `symbol`, `name`, & `decimals`
 
 
 ## Setup

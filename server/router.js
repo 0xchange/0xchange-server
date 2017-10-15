@@ -8,9 +8,9 @@ var router = express.Router();
 
 router.get('/order', api.order.getAll);
 router.post('/order', api.order.getPage);
-router.post('/order/new/', api.order.new);
+router.post('/order/new', api.order.new);
 
 router.get('/token', api.token.getAll);
-router.post('/token', api.token.new);
+router.post('/token/new', api.token.new);
 
 module.exports = router;
