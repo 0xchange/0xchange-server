@@ -1,6 +1,25 @@
 # 0xchange-server
 ETHWaterloo
 
+## API reference:
+
+`GET: /get` - gets all orders in the DB
+
+`POST: /get` - gets some orders in the DB
+  - body:
+  ```
+  {
+    sortBy: DB column string
+    asc: acending? true/false
+    limit: numberPerPage
+    page: pageNumber
+  }
+  ```
+
+`POST: /post/order` - adds new order to DB if valid
+  - body: `ZeroEx.SignedOrder`
+
+
 ## Setup
 
 `npm i`
