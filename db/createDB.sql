@@ -13,7 +13,7 @@ CREATE TABLE orders(
 );
 
 CREATE TABLE tokens(
-  address char(42) NOT NULL,
+  address char(42) PRIMARY KEY,
   symbol varchar(45),
   token_name varchar(45),
   decimals bigint
