@@ -21,7 +21,7 @@ try {
   https.createServer({
     key: fs.readFileSync('privkey.pem'),
     cert: fs.readFileSync('fullchain.pem')
-  }, app).listen(3000);
+  }, app).listen(3001);
 } catch (err) {
   console.warn('HTTPS server failed. HTTP instead');
   app.listen(3000, function() {
