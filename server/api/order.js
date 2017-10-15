@@ -1,5 +1,6 @@
 var BigNumber = require('bignumber.js');
 var db = require('../../shared/db.js');
+var pad = require('pad');
 var zeroEx = require('../../shared/zeroEx.js');
 
 module.exports.getAll = function(req, res) {
@@ -48,12 +49,12 @@ module.exports.new = function(req, res) {
       ) VALUES($1, $2, $3, $4, $5, $6, $7)`,
       [
         order,
-        order.makerFee.toString(16),
+        pad(64, order.makerFee.toString(16), '0'),
         order.makerTokenAddress,
-        order.makerTokenAmount.toString(16),
-        order.takerFee.toString(16),
+        pad(64, order.makerTokenAmount.toString(16), '0'),
+        pad(64, order.takerFee.toString(16), '0'),
         order.takerTokenAddress,
-        order.takerTokenAmount.toString(16)
+        pad(64, order.takerTokenAmount.toString(16), '0')
       ]
     );
   }).then((result) => {
