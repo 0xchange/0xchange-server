@@ -5,7 +5,9 @@ var pg = require('pg');
 var pool;
 
 try {
-  pool = new pg.Pool(require('../config.js').pg);
+  var config = require('../config.js').pg;
+  if (!config) throw "OH NO!";
+  pool = new pg.Pool(config);
   console.log('Using config.js');
 } catch (err) {
   pool = new pg.Pool({
