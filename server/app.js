@@ -17,16 +17,17 @@ app.use('/', require('./router.js'));
 
 
 // Configure server and start listening.
+app.listen(3000, function() {
+  console.log('HTTP Express server listening on port 3000.');
+});
 try {
   https.createServer({
     key: fs.readFileSync('privkey.pem'),
     cert: fs.readFileSync('fullchain.pem')
   }, app).listen(3001);
+  console.log('HTTPS Express server listening on port 3001.');
 } catch (err) {
-  console.warn('HTTPS server failed. HTTP instead');
-  app.listen(3000, function() {
-    console.log('Express server listening on port 3000.');
-  });
+  console.warn('HTTPS server failed.');
 }
 
 
