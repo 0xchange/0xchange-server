@@ -4,6 +4,9 @@ var CronJob = require('cron').CronJob;
 var express = require('express');
 var fs = require('fs');
 var https = require('https');
+var subdomain = require('express-subdomain');
+
+var testnet = false;
 
 var app = express();
 
@@ -13,7 +16,16 @@ app.use(cors());
 
 
 // API Router
-app.use('/', require('./router.js'));
+app.use(subdomain('api', require('./router.js')));
+console.log('Running on mainnet.');
+
+try {
+  app.use(subdomain('api.kovan', require('../testnet/0xchange-server/server/router.js')));
+  testnet = true;
+  console.log('Running on kovan testnet.');
+} catch (err) {
+  console.log('Not using testnet');
+}
 
 
 // Configure server and start listening.
@@ -36,3 +48,11 @@ new CronJob({
   onTick: require('./scripts/purgeExpiredOrders.js'),
   start: true
 });
+
+if (testnet) {
+  new CronJob({
+    cronTime: '00 */5 * * * *',
+    onTick: require('../testnet/0xchange-server/server/scripts/purgeExpiredOrders.js'),
+    start: true
+  });
+}
