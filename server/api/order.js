@@ -18,13 +18,26 @@ module.exports.getAll = function(req, res) {
 module.exports.getPage = function(req, res) {
   var opts = req.body;
   var asc = opts.asc ? 'ASC' : 'DESC';
-  db.query(
-    'SELECT orderObj FROM orders ORDER BY '+opts.sortBy+' '+asc+' LIMIT $1 OFFSET $2;',
-    [
-      opts.limit,
-      parseInt(opts.page)*parseInt(opts.limit)
-    ]
-  ).then((result) => {
+  var queryPromise;
+  if (opts.tokenAddress) {
+    queryPromise = db.query(
+      'SELECT orderObj FROM orders WHERE makerTokenAddress = $1 OR takerTokenAddress = $1 ORDER BY '+opts.sortBy+' '+asc+' LIMIT $2 OFFSET $3;',
+      [
+        opts.tokenAddress,
+        opts.limit,
+        parseInt(opts.page)*parseInt(opts.limit)
+      ]
+    )
+  } else {
+    queryPromise = db.query(
+      'SELECT orderObj FROM orders ORDER BY '+opts.sortBy+' '+asc+' LIMIT $1 OFFSET $2;',
+      [
+        opts.limit,
+        parseInt(opts.page)*parseInt(opts.limit)
+      ]
+    )
+  }
+  queryPromise.then((result) => {
     var ret = [];
     result.rows.forEach((element) => {
       ret.push(element.orderobj);

@@ -2,6 +2,8 @@
 
 This is the server component of the 0xchange project for ETHWaterloo 2017!
 
+#### We won the 0x API Prize!
+
 - See the live site at https://0xchange.me/
 
 - by Billy Rennekamp, Gregory Hogue, Kevin Ho, & Alex Zhao
@@ -21,6 +23,7 @@ This is the server component of the 0xchange project for ETHWaterloo 2017!
     asc: acending? true/false
     limit: numberPerPage
     page: pageNumber
+    (tokenAddress: address)
   }
   ```
   - Possible sortBy columns: `makerfee`, `makertokenaddress`, `makertokenamount`, `takerfee`, `takertokenaddress`, or `takertokenamount`
