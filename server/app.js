@@ -19,7 +19,7 @@ app.use(cors());
 var router = express.Router();
 
 try {
-  app.use(subdomain('kovan-api', require('../testnet/0xchange-server/server/router.js')));
+  router.use('/kovan', require('../testnet/0xchange-server/server/router.js'));
   testnet = true;
   console.log('Running on kovan testnet.');
 } catch (err) {
