@@ -4,7 +4,6 @@ var CronJob = require('cron').CronJob;
 var express = require('express');
 var fs = require('fs');
 var https = require('https');
-var subdomain = require('express-subdomain');
 
 var testnet = false;
 
@@ -16,20 +15,17 @@ app.use(cors());
 
 
 // API Router
-var router = express.Router();
 
 try {
-  router.use('/kovan', require('../testnet/0xchange-server/server/router.js'));
+  app.use('/kovan', require('../testnet/0xchange-server/server/router.js'));
   testnet = true;
   console.log('Running on kovan testnet.');
 } catch (err) {
   console.log('Not using testnet');
 }
 
-router.use('/', require('./router.js'));
+app.use('/', require('./router.js'));
 console.log('Running on mainnet.');
-
-app.use(subdomain('api', router));
 
 
 // Configure server and start listening.
