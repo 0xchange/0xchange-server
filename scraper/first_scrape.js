@@ -1,9 +1,7 @@
 var async = require('async-bluebird');
-var {ExchangeContract, provider} = require('./util/ethers.js');
+var {ExchangeContractPromise, provider} = require('./util/ethers.js');
 var processLogFill = require('./util/processLogFill.js');
 var error_whitelist = require('./util/errorWhitelist.js');
-
-var LogFill = ExchangeContract.interface.events.LogFill();
 
 
 var error_logs = {};
@@ -17,11 +15,14 @@ function printErrorLogs() {
   }
 }
 
-provider.getLogs({
-  address: ExchangeContract.address,
-  topics: LogFill.topics,
-  fromBlock: 4219261,
-  toBlock: 'latest'
+ExchangeContractPromise().then((ExchangeContract) => {
+  var LogFill = ExchangeContract.interface.events.LogFill();
+  return provider.getLogs({
+    address: ExchangeContract.address,
+    topics: LogFill.topics,
+    fromBlock: 4219261,
+    toBlock: 'latest'
+  });
 }).then((logs) => {
   return async.each(logs, (log, callback) => {
     processLogFill(log).then(() => {

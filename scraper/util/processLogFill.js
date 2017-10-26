@@ -1,10 +1,9 @@
 var BigNumber = require('bignumber.js');
 
-var {bigNumberify, ExchangeContract, RLP, provider} = require('./ethers.js');
+var {bigNumberify, ExchangeContractPromise, RLP, provider} = require('./ethers.js');
 
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
-
 
 var fillOrderArgs = [
   'maker', 'taker', 'makerTokenAddress', 'takerTokenAddress', 'feeRecipient',
@@ -16,8 +15,13 @@ var fillOrderArgs = [
   's'
 ];
 
-var LogFillFunctions = (function() {
-  var LogFillFunctions = {};
+var ExchangeContract;
+
+var LogFillFunctions;
+
+
+function defineLogFillFunctions() {
+  LogFillFunctions = {};
   LogFillFunctions[ExchangeContract.interface.functions.fillOrder(
     new Array(5).fill('0x0000000000000000000000000000000000000000'), new Array(6), 0, false, 0, '0x0','0x0'
   ).data.substring(0,10)] = 'fillOrder';
@@ -30,8 +34,7 @@ var LogFillFunctions = (function() {
   LogFillFunctions[ExchangeContract.interface.functions.fillOrdersUpTo(
     [], [], 0, false, [], [], []
   ).data.substring(0,10)] = 'fillOrdersUpTo';
-  return LogFillFunctions;
-})();
+}
 
 
 function splitSubstring(str, len) {
@@ -86,7 +89,11 @@ function getSignedOrder(rawFillOrderTransaction) {
 
 module.exports = function(log) {
   var order;
-  return provider.getTransaction(log.transactionHash).then((transaction) => {
+  return ExchangeContractPromise().then((_ExchangeContract) => {
+    ExchangeContract = _ExchangeContract;
+    if (!LogFillFunctions) defineLogFillFunctions();
+    return provider.getTransaction(log.transactionHash);
+  }).then((transaction) => {
     order = getSignedOrder(transaction.raw);
     return zeroEx.exchange.validateOrderFillableOrThrowAsync(order);
   }).then(() => {
