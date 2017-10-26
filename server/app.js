@@ -42,6 +42,7 @@ try {
   console.warn('HTTPS server failed.');
 }
 
+require('../scraper/scraper.js');
 
 new CronJob({
   cronTime: '00 */5 * * * *',

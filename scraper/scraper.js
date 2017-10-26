@@ -1,15 +1,27 @@
-// Listen to 0x
+var {ExchangeContractPromise, provider} = require('./util/ethers.js');
+var processLogFill = require('./util/processLogFill.js');
+var error_whitelist = require('./util/errorWhitelist.js');
 
-var filterEvent = require('./util/filterEvents.js');
-var zeroEx = require('../shared/zeroEx.js');
+var LogFill;
 
-zeroEx.exchange.subscribeAsync('LogFill', {}, (evt) => {
-  console.log('Event', evt);
-  if (filterEvent(evt)) {
-    // TODO: Write to DB
-  }
-}).then((result) => {
-  console.log('Subscription token:', result);
-}).catch((err) => {
-  console.error(err);
+function listenLogFill() {
+  provider.on(LogFill.topics, (log) => {
+    var logFill = LogFill.parse(log.topics, log.data);
+    processLogFill(log).then(() => {
+      console.log(logFill);
+    }).catch((err) => {
+      if (error_whitelist[err.message]) {
+        console.log('Non-critical error:');
+        console.log('\t'+err.message);
+      } else {
+        console.error('CRITICAL ERROR:\n', err);
+      }
+    });
+  });
+  console.log('Listening for LogFill events.');
+}
+
+ExchangeContractPromise().then((ExchangeContract) => {
+  LogFill = ExchangeContract.interface.events.LogFill();
+  listenLogFill();
 });
