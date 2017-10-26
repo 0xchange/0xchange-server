@@ -43,7 +43,6 @@ try {
 }
 
 require('../scraper/scraper.js');
-
 new CronJob({
   cronTime: '00 */5 * * * *',
   onTick: require('./scripts/purgeExpiredOrders.js'),
@@ -51,6 +50,7 @@ new CronJob({
 });
 
 if (testnet) {
+  require('../testnet/0xchange-server/scraper/scraper.js');
   new CronJob({
     cronTime: '00 */5 * * * *',
     onTick: require('../testnet/0xchange-server/server/scripts/purgeExpiredOrders.js'),
