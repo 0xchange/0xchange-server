@@ -1,6 +1,5 @@
 var BigNumber = require('bignumber.js');
 var db = require('../../shared/db.js');
-var pad = require('pad');
 var zeroEx = require('../../shared/zeroEx.js');
 
 module.exports.getAll = function(req, res) {
@@ -58,26 +57,7 @@ module.exports.new = function(req, res) {
   order.takerFee = new BigNumber(order.takerFee);
   order.takerTokenAmount = new BigNumber(order.takerTokenAmount);
   zeroEx.exchange.validateOrderFillableOrThrowAsync(order).then(() => {
-    return db.query(
-      `INSERT INTO orders(
-        orderObj,
-        makerFee,
-        makerTokenAddress,
-        makerTokenAmount,
-        takerFee,
-        takerTokenAddress,
-        takerTokenAmount
-      ) VALUES($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        order,
-        pad(64, order.makerFee.toString(16), '0'),
-        order.makerTokenAddress,
-        pad(64, order.makerTokenAmount.toString(16), '0'),
-        pad(64, order.takerFee.toString(16), '0'),
-        order.takerTokenAddress,
-        pad(64, order.takerTokenAmount.toString(16), '0')
-      ]
-    );
+    return db.addOrder(order);
   }).then((result) => {
     res.sendStatus(200);
   }).catch((err) => {
