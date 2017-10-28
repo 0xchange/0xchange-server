@@ -6,30 +6,15 @@ var zeroEx = require('../../shared/zeroEx.js');
 var {
   arrayify,
   bigNumberify,
-  ExchangeContractPromise,
+  ExchangeContract,
   Interface,
   provider,
   RLP
 } = require('./ethers.js');
 
 
-var fillOrderArgs = [
-  'maker', 'taker', 'makerTokenAddress', 'takerTokenAddress', 'feeRecipient',
-  'makerTokenAmount', 'takerTokenAmount', 'makerFee', 'takerFee', 'expirationUnixTimestampSec', 'salt',
-  null,
-  null,
-  'v',
-  'r',
-  's'
-];
-
-var ExchangeContract;
-
-var LogFillFunctions;
-
-
-function defineLogFillFunctions() {
-  LogFillFunctions = {};
+var LogFillFunctions = (function() {
+  var LogFillFunctions = {};
   for (var fn of ['fillOrder', 'fillOrKillOrder', 'batchFillOrders', 'fillOrdersUpTo']) {
     var functionObj = ExchangeContract.interface.functions[fn];
     LogFillFunctions[ExchangeContract.interface.functions[fn].sighash] = {
@@ -38,16 +23,9 @@ function defineLogFillFunctions() {
       types: functionObj.signature.split('(', 2)[1].slice(0, -1).split(',')
     };
   }
-}
+  return LogFillFunctions;
+})();
 
-
-function splitSubstring(str, len) {
-  var ret = [ ];
-  for (var offset = 0, strLen = str.length; offset < strLen; offset += len) {
-    ret.push(str.substring(offset, offset + len));
-  }
-  return ret;
-}
 
 function ErrorWithInfo(message, info) {
   var error = new Error(message);
@@ -72,8 +50,8 @@ function getSignedOrder(rawFillOrderTransaction) {
     arrayify(rawParams)
   );
 
-  params.orderValues = param.orderValues.map((value) => {
-    return new BigNumber(value.toString();
+  params.orderValues = params.orderValues.map((value) => {
+    return new BigNumber(value.toString());
   });
 
   params.orderAddresses = params.orderAddresses.map((address) => {
@@ -106,11 +84,7 @@ function getSignedOrder(rawFillOrderTransaction) {
 
 module.exports = function(log) {
   var order;
-  return ExchangeContractPromise().then((_ExchangeContract) => {
-    ExchangeContract = _ExchangeContract;
-    if (!LogFillFunctions) defineLogFillFunctions();
-    return provider.getTransaction(log.transactionHash);
-  }).then((transaction) => {
+  return provider.getTransaction(log.transactionHash).then((transaction) => {
     order = getSignedOrder(transaction.raw);
     return zeroEx.exchange.validateOrderFillableOrThrowAsync(order);
   }).then(() => {

@@ -1,6 +1,8 @@
 var Promise = require('bluebird');
-var ethers = require('ethers');
-var zeroEx = require('../../shared/zeroEx.js');
+var ethers = Object.assign(require('ethers'), require('ethers-contracts'));;
+var config = require('../../shared/config.js');
+
+var address = config.exchangeContractAddress;
 
 var ExchangeInfo = {
   "abi": [
@@ -1007,12 +1009,6 @@ module.exports.RLP = ethers.utils.RLP;
 
 var provider = module.exports.provider = ethers.providers.getDefaultProvider();
 
-var ExchangeContract;
+module.exports.ExchangeContract = new ethers.Contract(address, ExchangeInfo.abi, provider);
 
-module.exports.ExchangeContractPromise = function() {
-  if (ExchangeContract) return Promise.resolve(ExchangeContract);
-  return zeroEx.exchange.getContractAddressAsync().then((address) => {
-    ExchangeContract = new ethers.Contract(address, ExchangeInfo.abi, provider);
-    return Promise.resolve(ExchangeContract);
-  });
-};
+module.exports.exchangeContractGenesisBlock = config.exchangeContractGenesisBlock;

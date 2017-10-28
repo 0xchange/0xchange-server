@@ -1,12 +1,19 @@
 var async = require('async-bluebird');
-var {ExchangeContractPromise, provider} = require('./util/ethers.js');
 var processLogFill = require('./util/processLogFill.js');
 var error_whitelist = require('./util/errorWhitelist.js');
+
+var {
+  ExchangeContract,
+  exchangeContractGenesisBlock,
+  provider
+} = require('./util/ethers.js');
 
 
 var error_logs = {};
 
 var success_count = 0;
+
+var LogFill = ExchangeContract.interface.events.LogFill();
 
 function printErrorLogs() {
   console.log('Non-critical errors:');
@@ -15,14 +22,11 @@ function printErrorLogs() {
   }
 }
 
-ExchangeContractPromise().then((ExchangeContract) => {
-  var LogFill = ExchangeContract.interface.events.LogFill();
-  return provider.getLogs({
-    address: ExchangeContract.address,
-    topics: LogFill.topics,
-    fromBlock: 4219261,
-    toBlock: 'latest'
-  });
+provider.getLogs({
+  address: ExchangeContract.address,
+  topics: LogFill.topics,
+  fromBlock: exchangeContractGenesisBlock,
+  toBlock: 'latest'
 }).then((logs) => {
   return async.each(logs, (log, callback) => {
     processLogFill(log).then(() => {
