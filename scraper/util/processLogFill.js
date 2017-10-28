@@ -1,9 +1,17 @@
 var BigNumber = require('bignumber.js');
 
-var {bigNumberify, ExchangeContractPromise, RLP, provider} = require('./ethers.js');
-
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
+
+var {
+  arrayify,
+  bigNumberify,
+  ExchangeContractPromise,
+  Interface,
+  provider,
+  RLP
+} = require('./ethers.js');
+
 
 var fillOrderArgs = [
   'maker', 'taker', 'makerTokenAddress', 'takerTokenAddress', 'feeRecipient',
@@ -22,18 +30,14 @@ var LogFillFunctions;
 
 function defineLogFillFunctions() {
   LogFillFunctions = {};
-  LogFillFunctions[ExchangeContract.interface.functions.fillOrder(
-    new Array(5).fill('0x0000000000000000000000000000000000000000'), new Array(6), 0, false, 0, '0x0','0x0'
-  ).data.substring(0,10)] = 'fillOrder';
-  LogFillFunctions[ExchangeContract.interface.functions.fillOrKillOrder(
-    new Array(5).fill('0x0000000000000000000000000000000000000000'), new Array(6), 0, 0, '0x0','0x0'
-  ).data.substring(0,10)] = 'fillOrKillOrder';
-  LogFillFunctions[ExchangeContract.interface.functions.batchFillOrders(
-    [], [], [], false, [], [], []
-  ).data.substring(0,10)] = 'batchFillOrders';
-  LogFillFunctions[ExchangeContract.interface.functions.fillOrdersUpTo(
-    [], [], 0, false, [], [], []
-  ).data.substring(0,10)] = 'fillOrdersUpTo';
+  for (var fn of ['fillOrder', 'fillOrKillOrder', 'batchFillOrders', 'fillOrdersUpTo']) {
+    var functionObj = ExchangeContract.interface.functions[fn];
+    LogFillFunctions[ExchangeContract.interface.functions[fn].sighash] = {
+      name: fn,
+      params: functionObj.inputs,
+      types: functionObj.signature.split('(', 2)[1].slice(0, -1).split(',')
+    };
+  }
 }
 
 
@@ -52,40 +56,53 @@ function ErrorWithInfo(message, info) {
 }
 
 function getSignedOrder(rawFillOrderTransaction) {
-  var rawParams = RLP.decode(rawFillOrderTransaction)[5];
-  var functionHash = rawParams.substring(0, 10);
-  var functionId = LogFillFunctions[functionHash];
-  if (!functionId) {throw ErrorWithInfo('NOT_A_LOGFILL_FUNCTION', functionHash)}
-  if (functionId != 'fillOrder') {throw ErrorWithInfo('NOT_FILLORDER', functionId)}
-  var hexParams = splitSubstring(rawParams.substring(10), 64);
+  var rawFunctionCall = RLP.decode(rawFillOrderTransaction)[5];
+
+  var functionHash = rawFunctionCall.substring(0, 10);
+  var functionInfo = LogFillFunctions[functionHash];
+
+  if (!functionInfo) {throw ErrorWithInfo('NOT_A_LOGFILL_FUNCTION', functionHash)}
+  if (functionInfo.name !== 'fillOrder') {throw ErrorWithInfo('NOT_FILLORDER', functionInfo.name)}
+
+  var rawParams = '0x'+rawFunctionCall.substring(10);
+
+  var params = Interface.decodeParams(
+    functionInfo.params,
+    functionInfo.types,
+    arrayify(rawParams)
+  );
+
+  params.orderValues = param.orderValues.map((value) => {
+    return new BigNumber(value.toString();
+  });
+
+  params.orderAddresses = params.orderAddresses.map((address) => {
+    return address.toLowerCase();
+  });
+
   var order = {
-    ecSignature: {},
-    exchangeContractAddress: ExchangeContract.address
+    ecSignature: {
+      r: params.r,
+      s: params.s,
+      v: params.v
+    },
+    exchangeContractAddress: ExchangeContract.address,
+    expirationUnixTimestampSec: params.orderValues[4],
+    feeRecipient: params.orderAddresses[4],
+    maker: params.orderAddresses[0],
+    makerFee: params.orderValues[2],
+    makerTokenAddress: params.orderAddresses[2],
+    makerTokenAmount: params.orderValues[0],
+    salt: params.orderValues[5],
+    taker: params.orderAddresses[1],
+    takerFee: params.orderValues[3],
+    takerTokenAddress: params.orderAddresses[3],
+    takerTokenAmount: params.orderValues[1]
   };
-
-  for (var i in fillOrderArgs) order[fillOrderArgs[i]] = hexParams[i];
-
-  for (var property of [
-    'feeRecipient', 'maker', 'makerTokenAddress', 'taker', 'takerTokenAddress'
-  ]) order[property] = '0x'+order[property].substring(24);
-
-  for (var property of [
-    'expirationUnixTimestampSec', 'makerFee', 'makerTokenAmount', 'salt', 'takerFee', 'takerTokenAmount'
-  ]) order[property] = new BigNumber(order[property], 16);
-
-  for (var property of ['r', 's']) order[property] = '0x'+order[property];
-
-  order.v = bigNumberify('0x'+order.v).toNumber();
-
-  delete order.null;
-
-  for (var property of ['v', 'r', 's']) {
-    order.ecSignature[property] = order[property];
-    delete order[property];
-  }
 
   return order;
 }
+
 
 module.exports = function(log) {
   var order;

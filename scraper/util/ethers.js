@@ -999,8 +999,10 @@ var ExchangeInfo = {
   "updated_at": 1502391794390
 }
 
-module.exports.bigNumberify = ethers.utils.bigNumberify;
+module.exports.Interface = ethers.Interface;
 
+module.exports.arrayify = ethers.utils.arrayify;
+module.exports.bigNumberify = ethers.utils.bigNumberify;
 module.exports.RLP = ethers.utils.RLP;
 
 var provider = module.exports.provider = ethers.providers.getDefaultProvider();
