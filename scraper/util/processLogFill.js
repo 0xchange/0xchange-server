@@ -1,4 +1,5 @@
 var BigNumber = require('bignumber.js');
+var txDecoder = require('ethereum-tx-decoder');
 
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
@@ -13,16 +14,53 @@ var {
 } = require('./ethers.js');
 
 
+var fnDecoder = new txDecoder.FunctionDecoder(ExchangeContract.interface);
+
+
 var LogFillFunctions = (function() {
+  var functions = ExchangeContract.interface.functions;
   var LogFillFunctions = {};
-  for (var fn of ['fillOrder', 'fillOrKillOrder', 'batchFillOrders', 'fillOrdersUpTo']) {
-    var functionObj = ExchangeContract.interface.functions[fn];
-    LogFillFunctions[ExchangeContract.interface.functions[fn].sighash] = {
-      name: fn,
-      params: functionObj.inputs,
-      types: functionObj.signature.split('(', 2)[1].slice(0, -1).split(',')
+
+  LogFillFunctions[functions.fillOrder.sighash] = function(params) {
+    params.orderValues = params.orderValues.map((value) => {
+      return new BigNumber(value.toString());
+    });
+    params.orderAddresses = params.orderAddresses.map((address) => {
+      return address.toLowerCase();
+    });
+
+    var order = {
+      ecSignature: {
+        r: params.r,
+        s: params.s,
+        v: params.v
+      },
+      exchangeContractAddress: ExchangeContract.address,
+      expirationUnixTimestampSec: params.orderValues[4],
+      feeRecipient: params.orderAddresses[4],
+      maker: params.orderAddresses[0],
+      makerFee: params.orderValues[2],
+      makerTokenAddress: params.orderAddresses[2],
+      makerTokenAmount: params.orderValues[0],
+      salt: params.orderValues[5],
+      taker: params.orderAddresses[1],
+      takerFee: params.orderValues[3],
+      takerTokenAddress: params.orderAddresses[3],
+      takerTokenAmount: params.orderValues[1]
     };
+
+    return order;
   }
+
+
+  LogFillFunctions[functions.fillOrKillOrder.sighash] = function() {}
+
+
+  LogFillFunctions[functions.batchFillOrders.sighash] = function() {}
+
+
+  LogFillFunctions[functions.fillOrdersUpTo.sighash] = function() {}
+
   return LogFillFunctions;
 })();
 
@@ -34,49 +72,18 @@ function ErrorWithInfo(message, info) {
 }
 
 function getSignedOrder(rawFillOrderTransaction) {
-  var rawFunctionCall = RLP.decode(rawFillOrderTransaction)[5];
+  var decodedTx = txDecoder.decodeTx(rawFillOrderTransaction);
+  var decodedFn = fnDecoder.decodeFn(decodedTx.data);
 
-  var functionHash = rawFunctionCall.substring(0, 10);
-  var functionInfo = LogFillFunctions[functionHash];
+  var sighash = decodedTx.data.substring(0,10);
+  var processFn = LogFillFunctions[sighash];
 
-  if (!functionInfo) {throw ErrorWithInfo('NOT_A_LOGFILL_FUNCTION', functionHash)}
-  if (functionInfo.name !== 'fillOrder') {throw ErrorWithInfo('NOT_FILLORDER', functionInfo.name)}
+  if (!processFn) {throw ErrorWithInfo('NOT_A_LOGFILL_FUNCTION', sighash)}
+  if (sighash !== ExchangeContract.interface.functions.fillOrder.sighash) {
+    throw ErrorWithInfo('NOT_FILLORDER', processFn.name);
+  }
 
-  var rawParams = '0x'+rawFunctionCall.substring(10);
-
-  var params = Interface.decodeParams(
-    functionInfo.params,
-    functionInfo.types,
-    arrayify(rawParams)
-  );
-
-  params.orderValues = params.orderValues.map((value) => {
-    return new BigNumber(value.toString());
-  });
-
-  params.orderAddresses = params.orderAddresses.map((address) => {
-    return address.toLowerCase();
-  });
-
-  var order = {
-    ecSignature: {
-      r: params.r,
-      s: params.s,
-      v: params.v
-    },
-    exchangeContractAddress: ExchangeContract.address,
-    expirationUnixTimestampSec: params.orderValues[4],
-    feeRecipient: params.orderAddresses[4],
-    maker: params.orderAddresses[0],
-    makerFee: params.orderValues[2],
-    makerTokenAddress: params.orderAddresses[2],
-    makerTokenAmount: params.orderValues[0],
-    salt: params.orderValues[5],
-    taker: params.orderAddresses[1],
-    takerFee: params.orderValues[3],
-    takerTokenAddress: params.orderAddresses[3],
-    takerTokenAmount: params.orderValues[1]
-  };
+  var order = processFn(decodedFn);
 
   return order;
 }
