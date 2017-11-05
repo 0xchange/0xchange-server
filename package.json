@@ -15,19 +15,19 @@
   },
   "homepage": "https://github.com/GFJHogue/0xchange-server#readme",
   "dependencies": {
-    "0x.js": "^0.22.1",
-    "async-bluebird": "^1.0.2",
-    "bignumber.js": "^4.1.0",
-    "bluebird": "^3.5.1",
-    "body-parser": "^1.18.2",
-    "cors": "^2.8.4",
-    "cron": "^1.3.0",
-    "ethereum-tx-decoder": "^1.0.1",
-    "ethers": "^2.1.2",
-    "ethers-contracts": "^2.1.3",
-    "express": "^4.16.2",
-    "pad": "^2.0.1",
-    "pg": "^7.4.0",
-    "web3-provider-engine": "^13.3.2"
+    "0x.js": "0.22.1",
+    "async-bluebird": "1.0.2",
+    "bignumber.js": "4.1.0",
+    "bluebird": "3.5.1",
+    "body-parser": "1.18.2",
+    "cors": "2.8.4",
+    "cron": "1.3.0",
+    "ethereum-tx-decoder": "1.0.1",
+    "ethers": "2.1.2",
+    "ethers-contracts": "2.1.3",
+    "express": "4.16.2",
+    "pad": "2.0.1",
+    "pg": "7.4.0",
+    "web3-provider-engine": "13.3.2"
   }
 }
