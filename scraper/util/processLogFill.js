@@ -1,5 +1,8 @@
+var {async, Promise} = require('async-bluebird');
 var BigNumber = require('bignumber.js');
 var txDecoder = require('ethereum-tx-decoder');
+
+var error_whitelist = require('./errorWhitelist.js');
 
 var db = require('../../shared/db.js');
 var zeroEx = require('../../shared/zeroEx.js');
@@ -49,7 +52,7 @@ var LogFillFunctions = (function() {
       takerTokenAmount: params.orderValues[1]
     };
 
-    return order;
+    return [order];
   }
 
 
@@ -59,7 +62,45 @@ var LogFillFunctions = (function() {
   LogFillFunctions[functions.batchFillOrders.sighash] = function() {}
 
 
-  LogFillFunctions[functions.fillOrdersUpTo.sighash] = function() {}
+  LogFillFunctions[functions.fillOrdersUpTo.sighash] = function(params) {
+    params.orderValues = params.orderValues.map((orderValues) => {
+      return orderValues.map((value) => {
+        return new BigNumber(value.toString());
+      });
+    });
+    params.orderAddresses = params.orderAddresses.map((orderAddresses) => {
+      return orderAddresses.map((address) => {
+        return address.toLowerCase();
+      });
+    });
+
+    var numOrders = params.orderAddresses.length;
+    var orders = new Array(numOrders);
+
+    for (var i = 0; i < numOrders; i++) {
+      orders[i] = {
+        ecSignature: {
+          r: params.r[i],
+          s: params.s[i],
+          v: params.v[i]
+        },
+        exchangeContractAddress: ExchangeContract.address,
+        expirationUnixTimestampSec: params.orderValues[i][4],
+        feeRecipient: params.orderAddresses[i][4],
+        maker: params.orderAddresses[i][0],
+        makerFee: params.orderValues[i][2],
+        makerTokenAddress: params.orderAddresses[i][2],
+        makerTokenAmount: params.orderValues[i][0],
+        salt: params.orderValues[i][5],
+        taker: params.orderAddresses[i][1],
+        takerFee: params.orderValues[i][3],
+        takerTokenAddress: params.orderAddresses[i][3],
+        takerTokenAmount: params.orderValues[i][1]
+      };
+    }
+
+    return orders;
+  }
 
   return LogFillFunctions;
 })();
@@ -71,7 +112,7 @@ function ErrorWithInfo(message, info) {
   return error;
 }
 
-function getSignedOrder(rawFillOrderTransaction) {
+function getSignedOrders(rawFillOrderTransaction) {
   var decodedTx = txDecoder.decodeTx(rawFillOrderTransaction);
   var decodedFn = fnDecoder.decodeFn(decodedTx.data);
 
@@ -79,22 +120,30 @@ function getSignedOrder(rawFillOrderTransaction) {
   var processFn = LogFillFunctions[sighash];
 
   if (!processFn) {throw ErrorWithInfo('NOT_A_LOGFILL_FUNCTION', sighash)}
-  if (sighash !== ExchangeContract.interface.functions.fillOrder.sighash) {
-    throw ErrorWithInfo('NOT_FILLORDER', processFn.name);
-  }
 
-  var order = processFn(decodedFn);
+  var orders = processFn(decodedFn);
 
-  return order;
+  return orders;
 }
 
 
 module.exports = function(log) {
-  var order;
+  var error_logs = {};
+
   return provider.getTransaction(log.transactionHash).then((transaction) => {
-    order = getSignedOrder(transaction.raw);
-    return zeroEx.exchange.validateOrderFillableOrThrowAsync(order);
-  }).then(() => {
-    return db.addOrder(order);
-  });
+    var orders = getSignedOrders(transaction.raw);
+
+    return async.each(orders, (order, callback) => {
+      zeroEx.exchange.validateOrderFillableOrThrowAsync(order).then(() => {
+        return db.addOrder(order);
+      }).then(() => callback()).catch((err) => {
+        if (error_whitelist[err.message]) {
+          error_logs[err] = true;
+          callback();
+        } else {
+          callback(err);
+        }
+      });
+    });
+  }).then(() => {return Promise.resolve(error_logs)});
 }

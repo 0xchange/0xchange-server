@@ -1,6 +1,5 @@
 var async = require('async-bluebird');
 var processLogFill = require('./util/processLogFill.js');
-var error_whitelist = require('./util/errorWhitelist.js');
 
 var {
   ExchangeContract,
@@ -29,21 +28,15 @@ provider.getLogs({
   toBlock: 'latest'
 }).then((logs) => {
   return async.each(logs, (log, callback) => {
-    processLogFill(log).then(() => {
+    processLogFill(log).then((errors) => {
+      Object.assign(error_logs, errors);
       success_count++;
       callback();
-    }).catch((err) => {
-      if (error_whitelist[err.message]) {
-        error_logs[err] = true;
-        callback();
-      } else {
-        callback(err);
-      }
-    });
+    }).catch(callback);
   });
 }).then(() => {
   printErrorLogs();
-  console.log('Got', success_count, 'valid orders!');
+  console.log('Got', success_count, 'orders!');
   process.exit();
 }).catch((err) => {
   printErrorLogs();
