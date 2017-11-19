@@ -27,8 +27,10 @@ provider.getLogs({
   fromBlock: exchangeContractGenesisBlock,
   toBlock: 'latest'
 }).then((logs) => {
-  return async.each(logs, (log, callback) => {
+  console.log('Got logs. Processing...');
+  return async.eachLimit(logs, 10, (log, callback) => {
     processLogFill(log).then((errors) => {
+      console.log('Processed', success_count);
       Object.assign(error_logs, errors);
       success_count++;
       callback();

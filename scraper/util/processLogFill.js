@@ -133,7 +133,7 @@ module.exports = function(log) {
   return provider.getTransaction(log.transactionHash).then((transaction) => {
     var orders = getSignedOrders(transaction.raw);
 
-    return async.each(orders, (order, callback) => {
+    return async.eachLimit(orders, 10, (order, callback) => {
       zeroEx.exchange.validateOrderFillableOrThrowAsync(order).then(() => {
         return db.addOrder(order);
       }).then(() => callback()).catch((err) => {

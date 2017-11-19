@@ -1,5 +1,16 @@
 var Promise = require('bluebird');
-var ethers = Object.assign(require('ethers'), require('ethers-contracts'));;
+
+var {
+  Contract,
+  Interface
+} = require('ethers-contracts');
+var {
+  arrayify,
+  bigNumberify,
+  RLP
+} = require('ethers-utils');
+var {getDefaultProvider} = require('ethers-providers');
+
 var config = require('../../shared/config.js');
 
 var address = config.exchangeContractAddress;
@@ -1001,14 +1012,14 @@ var ExchangeInfo = {
   "updated_at": 1502391794390
 }
 
-module.exports.Interface = ethers.Interface;
+module.exports.Interface = Interface;
 
-module.exports.arrayify = ethers.utils.arrayify;
-module.exports.bigNumberify = ethers.utils.bigNumberify;
-module.exports.RLP = ethers.utils.RLP;
+module.exports.arrayify = arrayify;
+module.exports.bigNumberify = bigNumberify;
+module.exports.RLP = RLP;
 
-var provider = module.exports.provider = ethers.providers.getDefaultProvider();
+var provider = module.exports.provider = getDefaultProvider();
 
-module.exports.ExchangeContract = new ethers.Contract(address, ExchangeInfo.abi, provider);
+module.exports.ExchangeContract = new Contract(address, ExchangeInfo.abi, provider);
 
 module.exports.exchangeContractGenesisBlock = config.exchangeContractGenesisBlock;
