@@ -56,12 +56,12 @@ var LogFillFunctions = (function() {
   }
 
 
-  LogFillFunctions[functions.fillOrKillOrder.sighash] = function() {}
+  LogFillFunctions[functions.fillOrKillOrder.sighash] = function() {
+    console.error('FILL_OR_KILL_ORDER');
+  }
 
 
-  LogFillFunctions[functions.batchFillOrders.sighash] = function() {}
-
-
+  LogFillFunctions[functions.batchFillOrders.sighash] =
   LogFillFunctions[functions.fillOrdersUpTo.sighash] = function(params) {
     params.orderValues = params.orderValues.map((orderValues) => {
       return orderValues.map((value) => {
